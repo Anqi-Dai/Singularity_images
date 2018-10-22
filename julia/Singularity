@@ -1,5 +1,5 @@
-Bootstrap: docker
-From: ubuntu:latest
+Bootstrap: shub
+From: singularityhub/ubuntu:latest
 
 %help
 echo "Usage: singularity run "
