@@ -12,7 +12,7 @@ LANGUAGE=$LANG
 LC_ALL=$LANG
 export LANG LANGUAGE LC_ALL
 
-/julia-9d11f62bcb/bin/julia
+exec /julia-9d11f62bcb/bin/julia "$@"
 
 %post
 apt-get update
