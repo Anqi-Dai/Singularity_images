@@ -1,0 +1,48 @@
+Bootstrap: shub
+From: singularityhub/ubuntu:latest
+
+%help
+echo "Usage: singularity run whippet.simg (index|quant|delta) [args]"
+
+%files
+  precompile_pkgs.jl
+
+%runscript
+
+export JULIA_LOAD_PATH=/root/.julia/v0.6/
+
+CMD=$1
+shift
+
+if [ "$CMD" = quant ] || [ "$CMD" = index ] || [ "$CMD" = delta ];
+then
+  exec /usr/bin/julia --precompiled=yes --compilecache=yes /root/.julia/v0.6/Whippet/bin/whippet-${CMD}.jl $@
+else
+  echo "Usage: singularity run whippet.simg (index|quant|delta) [args]"
+fi
+
+
+%post
+apt-get update
+apt install -y build-essential unzip git tar wget liblzma-dev libz-dev libbz2-dev \
+  libdb-dev gcc g++ zip gfortran make 
+wget -q https://julialang-s3.julialang.org/bin/linux/x64/0.6/julia-0.6.4-linux-x86_64.tar.gz -O julia-0.6.4-linux-x86_64.tar.gz
+tar -xzf julia-0.6.4-linux-x86_64.tar.gz
+
+[ ! -e /usr/bin/julia ] && ln -s /julia-9d11f62bcb/bin/julia /usr/bin/julia
+
+export JULIA_LOAD_PATH=/root/.julia/v0.6/
+
+echo 'Pkg.add("Whippet")' | /usr/bin/julia
+echo 'Pkg.update()'
+#/usr/bin/julia -- precompile_pkgs.jl
+
+chmod 777 -R /root/
+
+# these are specific to scc
+# create the directories in case OverlayFS support wasn't built in
+for d in /scratch /share /project /projectnb /restricted /usr1 /usr2 /usr3 /usr4 /var/spool/sge;
+do
+  rm -rf $d
+  mkdir $d
+done
